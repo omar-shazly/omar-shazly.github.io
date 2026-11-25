@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Part 1: Case brief | Omar Shazly</title>
+<title>Part 1: Case brief – Aspelia Markets | Omar Shazly</title>
+<meta name="description" content="Case brief for a fictional CySEC-regulated multi-asset trading platform: the company, its systems, the regulatory trigger and the data management programme.">
 <link rel="stylesheet" href="../../assets/style.css">
 </head>
 <body>
@@ -14,10 +15,76 @@
 
 <main><div class="wrap">
   <h1>Part 1: Case brief</h1>
-  <p class="lede">The company, its systems, and the data problems the programme sets out to fix.</p>
-  <div class="fictional"><strong>Fictional case.</strong> The company, its people, systems and data are invented. All data is synthetic.</div>
-  <p>This page is being written.</p>
-  <div class="pager"><a href="../../">← All parts</a><span></span></div>
+  <p class="lede">Aspelia Markets Ltd: a multi-asset online trading platform in Limassol, a regulator's findings letter, and the data management programme that follows.</p>
+
+  <div class="fictional"><strong>Fictional case.</strong> Aspelia Markets Ltd, its people, systems, figures and the inspection described here are invented. Any resemblance to a real firm is coincidental. All data used in later parts is synthetic.</div>
+
+  <h2>1. The company</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Legal entity</th><td>Aspelia Markets Ltd, Limassol, Cyprus</td></tr>
+    <tr><th>Licence</th><td>Cyprus Investment Firm (CIF), authorised by the Cyprus Securities and Exchange Commission (CySEC) under Law 87(I)/2017, which transposes MiFID II. Passported to other EEA countries.</td></tr>
+    <tr><th>Business</th><td>Online multi-asset trading platform: real shares and ETFs, plus CFDs on indices, currencies and commodities. Web and mobile apps.</td></tr>
+    <tr><th>Clients</th><td>About 42,000 funded accounts, mostly retail, in 19 EEA countries; a small number of professional clients.</td></tr>
+    <tr><th>People</th><td>About 180 staff across Trading Operations, Client Onboarding, Compliance and AML, Finance, Marketing, Customer Support and IT.</td></tr>
+    <tr><th>Founded</th><td>2016; grew quickly from 2020 by adding products and countries.</td></tr>
+  </table></div>
+
+  <h2>2. Systems landscape</h2>
+  <p>Each system was bought or built for one department as the firm grew. Each one creates its own client identifier, and they are not linked by any shared key.</p>
+  <div class="table-scroll"><table>
+    <tr><th>System</th><th>Used by</th><th>Holds</th></tr>
+    <tr><td>CRM</td><td>Marketing, Sales, Support</td><td>Leads, client contact details, campaigns, support tickets</td></tr>
+    <tr><td>Onboarding portal</td><td>Client Onboarding, Compliance</td><td>Application forms, appropriateness test, KYC documents (ID, proof of address, source of funds), risk rating</td></tr>
+    <tr><td>Trading platform</td><td>Trading Operations</td><td>Trading accounts, instruments, orders, trades, positions</td></tr>
+    <tr><td>Payments hub</td><td>Finance</td><td>Deposits and withdrawals through card, bank and e-wallet providers</td></tr>
+    <tr><td>Back office</td><td>Finance</td><td>Client balances, fees, general ledger postings</td></tr>
+    <tr><td>Regulatory reporting tool</td><td>Compliance</td><td>Transaction reports (MiFIR) for shares and ETFs, and derivative reports (EMIR) for CFDs</td></tr>
+    <tr><td>Spreadsheets</td><td>Management</td><td>Monthly board pack, built by hand from exports of the systems above</td></tr>
+  </table></div>
+
+  <h2>3. The trigger</h2>
+  <p>In 2026 CySEC carried out an on-site inspection focused on anti-money-laundering controls. It sampled 60 client files. In 14 of them, at least one required KYC (Know Your Customer) item was missing, expired or did not match the client record: proof of address older than allowed, no source-of-funds evidence for large deposits, or a date of birth in the trading platform that differed from the ID document.</p>
+  <p>The findings letter gave Aspelia a deadline to remediate its client records and to show that the controls behind them work. The board appointed a Head of Data Governance and funded a data management programme. Its first question was a simple one: <em>how many active clients do we have, and is their data complete?</em> No one in the firm could answer it.</p>
+
+  <h2>4. What the first weeks uncovered</h2>
+  <p>The KYC gaps were a symptom. Looking for their causes turned up six related problems:</p>
+  <div class="table-scroll"><table>
+    <tr><th>#</th><th>Problem</th><th>Example</th></tr>
+    <tr><td>P1</td><td>Incomplete and inconsistent client data</td><td>Missing KYC documents and expiry dates; countries stored as free text (“Germany”, “DE”, “Deutschland”).</td></tr>
+    <tr><td>P2</td><td>Duplicate clients</td><td>The same person registered twice, once from the web and once from the app, with two trading accounts and two risk ratings.</td></tr>
+    <tr><td>P3</td><td>No one owns the data</td><td>When a client's address is wrong, Onboarding, Support and IT each say it is another team's job to fix.</td></tr>
+    <tr><td>P4</td><td>Different meanings for the same word</td><td>“Active client” means traded in 90 days for Trading, funded balance above zero for Finance, and logged in within 30 days for Marketing. The board pack mixes all three.</td></tr>
+    <tr><td>P5</td><td>Nobody knows where data lives or how it flows</td><td>A GDPR access request took 40 days instead of the one month allowed, because nobody had a list of the systems holding the client's personal data.</td></tr>
+    <tr><td>P6</td><td>Reporting built by hand</td><td>Regulatory reports are rejected when client identifiers are missing, and the board pack takes four days of manual work each month.</td></tr>
+  </table></div>
+
+  <h2>5. The programme</h2>
+  <p>The programme follows the DAMA-DMBOK2 framework, which defines data management as the development, execution and supervision of plans, policies, programs and practices that deliver, control, protect and enhance the value of data and information assets throughout their lifecycles. Each part of this portfolio is one workstream:</p>
+  <div class="table-scroll"><table>
+    <tr><th>Part</th><th>Workstream</th><th>Fixes</th><th>DMBOK knowledge area</th></tr>
+    <tr><td>2</td><td>Data model and database: one agreed model of clients, accounts, instruments, trades and payments</td><td>P1, P2</td><td>Data Modeling and Design</td></tr>
+    <tr><td>3</td><td>Data quality assessment: profile the data, define rules, score it, find root causes</td><td>P1</td><td>Data Quality</td></tr>
+    <tr><td>4</td><td>Governance: owners, stewards, policies and decision rights</td><td>P3</td><td>Data Governance</td></tr>
+    <tr><td>5</td><td>Glossary, catalogue and lineage</td><td>P4, P5</td><td>Metadata Management</td></tr>
+    <tr><td>6</td><td>Master and reference data: one golden record per client, governed code lists</td><td>P2, P1</td><td>Reference and Master Data</td></tr>
+    <tr><td>7</td><td>Security, privacy and retention</td><td>P5</td><td>Data Security; Document and Content Management</td></tr>
+    <tr><td>8</td><td>Warehouse and dashboard: one trusted source for KPIs and the quality scorecard</td><td>P6</td><td>Data Warehousing and Business Intelligence</td></tr>
+  </table></div>
+
+  <h2>6. How success is measured</h2>
+  <ul>
+    <li>KYC completeness for active clients: from an estimated 77% to at least 99%.</li>
+    <li>Duplicate client rate: below 0.5% of client records.</li>
+    <li>Every critical data element has a named owner and steward.</li>
+    <li>One approved definition of “active client”, used in every report.</li>
+    <li>GDPR access requests answered within the one-month limit, using the data inventory.</li>
+    <li>The monthly board pack produced from the warehouse, without manual rework.</li>
+  </ul>
+
+  <h2>7. Scope</h2>
+  <p><strong>In scope:</strong> client, account, instrument, trade and payment data across the systems above. <strong>Out of scope:</strong> market-data feeds, HR and payroll data, and the firm's own treasury.</p>
+
+  <div class="pager"><a href="../../">← All parts</a><span>Next: Part 2, Data model (coming soon)</span></div>
 </div></main>
 
 <footer class="site"><div class="wrap">
