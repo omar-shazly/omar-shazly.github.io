@@ -34,7 +34,7 @@
   <p>Ten entities, in scope as defined in the case brief: client, account, instrument, trade and payment data. Notation: Information Engineering (crow's foot). <code>||</code> means exactly one, <code>o{</code> zero or many, <code>}|</code> one or many.</p>
   <figure>
     <img src="conceptual-model.png" alt="Conceptual data model: Country, Client, KYC Document, Risk Assessment, Trading Account, Currency, Instrument, Order, Trade and Payment, with their relationships.">
-    <figcaption>Figure 1. Conceptual data model (<a href="conceptual-model.mmd">Mermaid source</a>).</figcaption>
+    <figcaption>Figure 1. Conceptual data model (<a href="conceptual-model.mmd.txt">Mermaid source</a>).</figcaption>
   </figure>
 
   <h3>Business rules the relationships express</h3>
@@ -53,7 +53,7 @@
   <p>The conceptual model extended with attributes, keys and domains, and normalized to third normal form (3NF): every attribute depends on the key, the whole key and nothing but the key. The many-to-many relationship between Client and Trading Account is resolved by the associative entity <strong>Account Holding</strong>.</p>
   <figure>
     <img src="logical-model.png" alt="Logical data model with attributes, primary keys, foreign keys and alternate keys for all eleven entities.">
-    <figcaption>Figure 2. Logical data model. PK primary key, FK foreign key, AK alternate key (<a href="logical-model.mmd">Mermaid source</a>).</figcaption>
+    <figcaption>Figure 2. Logical data model. PK primary key, FK foreign key, AK alternate key (<a href="logical-model.mmd.txt">Mermaid source</a>).</figcaption>
   </figure>
 
   <h3>Entities, keys and domains</h3>
