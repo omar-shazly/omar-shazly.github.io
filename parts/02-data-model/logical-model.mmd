@@ -1,0 +1,106 @@
+erDiagram
+  COUNTRY ||--o{ CLIENT : "is residence of"
+  CLIENT ||--o{ KYC_DOCUMENT : provides
+  CLIENT ||--o{ RISK_ASSESSMENT : "is rated by"
+  CLIENT ||--o{ ACCOUNT_HOLDING : has
+  TRADING_ACCOUNT ||--|{ ACCOUNT_HOLDING : "is held through"
+  CURRENCY ||--o{ TRADING_ACCOUNT : "is base currency of"
+  TRADING_ACCOUNT ||--o{ ORDER : places
+  TRADING_ACCOUNT ||--o{ PAYMENT : "is funded by"
+  INSTRUMENT ||--o{ ORDER : "is subject of"
+  ORDER ||--o{ TRADE : "results in"
+  CURRENCY ||--o{ INSTRUMENT : "is quoted in"
+  CURRENCY ||--o{ PAYMENT : "is paid in"
+  COUNTRY {
+    code country_code PK
+    text country_name
+  }
+  CURRENCY {
+    code currency_code PK
+    text currency_name
+  }
+  CLIENT {
+    id client_id PK
+    text first_name
+    text last_name
+    date date_of_birth
+    text email "AK"
+    text id_document_number "AK (with issuing country)"
+    code id_issuing_country "AK"
+    text address_line
+    text city
+    text postcode
+    code residence_country_code FK
+    code client_category
+    code registration_channel
+    date registration_date
+    code onboarding_status
+  }
+  KYC_DOCUMENT {
+    id kyc_document_id PK
+    id client_id FK
+    code document_type
+    date issue_date
+    date expiry_date
+    date received_date
+    code verification_status
+    date verified_date
+  }
+  RISK_ASSESSMENT {
+    id risk_assessment_id PK
+    id client_id FK
+    date assessment_date
+    code risk_rating
+    text reason
+  }
+  TRADING_ACCOUNT {
+    id account_id PK
+    text account_number "AK"
+    code base_currency_code FK
+    date opened_date
+    date closed_date
+    code account_status
+  }
+  ACCOUNT_HOLDING {
+    id client_id PK,FK
+    id account_id PK,FK
+    code holder_role
+    date start_date
+    date end_date
+  }
+  PAYMENT {
+    id payment_id PK
+    id account_id FK
+    code direction
+    amount amount
+    code currency_code FK
+    code method
+    timestamp requested_at
+    code status
+  }
+  INSTRUMENT {
+    id instrument_id PK
+    text isin "AK"
+    text symbol
+    text instrument_name
+    code asset_class
+    code quote_currency_code FK
+  }
+  ORDER {
+    id order_id PK
+    id account_id FK
+    id instrument_id FK
+    timestamp placed_at
+    code side
+    code order_type
+    quantity quantity
+    amount limit_price
+    code order_status
+  }
+  TRADE {
+    id trade_id PK
+    id order_id FK
+    timestamp executed_at
+    quantity quantity
+    amount price
+  }

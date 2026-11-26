@@ -1,0 +1,12 @@
+erDiagram
+  COUNTRY ||--o{ CLIENT : "is residence of"
+  CLIENT ||--o{ KYC_DOCUMENT : provides
+  CLIENT ||--o{ RISK_ASSESSMENT : "is rated by"
+  CLIENT }|--o{ TRADING_ACCOUNT : holds
+  CURRENCY ||--o{ TRADING_ACCOUNT : "is base currency of"
+  TRADING_ACCOUNT ||--o{ ORDER : places
+  TRADING_ACCOUNT ||--o{ PAYMENT : "is funded by"
+  INSTRUMENT ||--o{ ORDER : "is subject of"
+  ORDER ||--o{ TRADE : "results in"
+  CURRENCY ||--o{ INSTRUMENT : "is quoted in"
+  CURRENCY ||--o{ PAYMENT : "is paid in"

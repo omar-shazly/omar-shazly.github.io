@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 2: Data model – Aspelia Markets | Omar Shazly</title>
+<meta name="description" content="Conceptual and logical data model for a fictional CySEC-regulated trading platform: clients, KYC, risk, accounts, payments, instruments, orders and trades.">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="name" href="../../">Omar Shazly · Data Management Portfolio</a>
+  <nav><a href="../../">Home</a><a href="../01-case-brief/">Case brief</a><a href="./">Data model</a></nav>
+</div></header>
+
+<main><div class="wrap">
+  <h1>Part 2: Data model and database</h1>
+  <p class="lede">One agreed model of Aspelia's clients, KYC evidence, accounts, payments, instruments, orders and trades, built from the business rules down to a working database.</p>
+
+  <div class="fictional"><strong>Fictional case.</strong> Aspelia Markets Ltd and its systems are invented. The model is designed for this case study; all data loaded into it later is synthetic.</div>
+
+  <div class="callout"><strong>Status:</strong> conceptual and logical models complete. The physical model (SQLite) and the database build with synthetic data are in progress and will be added to this page.</div>
+
+  <h2>1. Why a model first</h2>
+  <p>Each of Aspelia's systems creates its own client identifier and stores client data its own way (<a href="../01-case-brief/">Part 1</a>). Before any data can be profiled, matched or reported on, the firm needs one agreed description of what its data is and how it fits together. This part targets two of the six problems:</p>
+  <div class="table-scroll"><table>
+    <tr><th>Problem</th><th>How the model addresses it</th></tr>
+    <tr><td>P1 Incomplete and inconsistent client data</td><td>KYC evidence is stored per document, with type, issue, expiry and verification dates, so missing or expired items can be measured. Countries and currencies come from governed code lists (ISO 3166, ISO 4217) instead of free text.</td></tr>
+    <tr><td>P2 Duplicate clients</td><td>One Client entity with a system-generated key, separate from the accounts the client holds. Email and ID document number are kept as alternate keys, the attributes later used to detect duplicates (Part 6).</td></tr>
+  </table></div>
+  <p>The model is built at the three levels of detail described in DAMA-DMBOK2: <strong>conceptual</strong> (the business entities and how they relate), <strong>logical</strong> (every attribute, key and allowed value, still independent of technology) and <strong>physical</strong> (the design for a specific database product).</p>
+
+  <h2>2. Conceptual model</h2>
+  <p>Ten entities, in scope as defined in the case brief: client, account, instrument, trade and payment data. Notation: Information Engineering (crow's foot). <code>||</code> means exactly one, <code>o{</code> zero or many, <code>}|</code> one or many.</p>
+  <figure>
+    <img src="conceptual-model.png" alt="Conceptual data model: Country, Client, KYC Document, Risk Assessment, Trading Account, Currency, Instrument, Order, Trade and Payment, with their relationships.">
+    <figcaption>Figure 1. Conceptual data model (<a href="conceptual-model.mmd">Mermaid source</a>).</figcaption>
+  </figure>
+
+  <h3>Business rules the relationships express</h3>
+  <ul class="rules">
+    <li>Each Client must reside in exactly one Country; a Country may be the residence of many Clients.</li>
+    <li>Each Client may provide zero, one or many KYC Documents; each KYC Document belongs to exactly one Client.</li>
+    <li>Each Client may be rated by zero, one or many Risk Assessments; the client's current rating is the latest one.</li>
+    <li>Each Client may hold zero, one or many Trading Accounts (a client can exist while onboarding, before any account is opened); each Trading Account is held by one or many Clients (joint accounts are allowed).</li>
+    <li>Each Trading Account has exactly one base Currency.</li>
+    <li>Each Trading Account may place zero, one or many Orders, and may be funded by zero, one or many Payments.</li>
+    <li>Each Order is for exactly one Instrument, and may result in zero, one or many Trades (cancelled orders produce none; large orders can be filled in several parts). Each Trade comes from exactly one Order.</li>
+    <li>Each Instrument is quoted in exactly one Currency; each Payment is made in exactly one Currency.</li>
+  </ul>
+
+  <h2>3. Logical model</h2>
+  <p>The conceptual model extended with attributes, keys and domains, and normalized to third normal form (3NF): every attribute depends on the key, the whole key and nothing but the key. The many-to-many relationship between Client and Trading Account is resolved by the associative entity <strong>Account Holding</strong>.</p>
+  <figure>
+    <img src="logical-model.png" alt="Logical data model with attributes, primary keys, foreign keys and alternate keys for all eleven entities.">
+    <figcaption>Figure 2. Logical data model. PK primary key, FK foreign key, AK alternate key (<a href="logical-model.mmd">Mermaid source</a>).</figcaption>
+  </figure>
+
+  <h3>Entities, keys and domains</h3>
+  <div class="table-scroll"><table>
+    <tr><th>Entity</th><th>Primary key</th><th>Key attributes and domains</th></tr>
+    <tr><td>Country</td><td>Country Code (ISO 3166-1 alpha-2)</td><td>Country Name</td></tr>
+    <tr><td>Currency</td><td>Currency Code (ISO 4217)</td><td>Currency Name</td></tr>
+    <tr><td>Client</td><td>Client ID (surrogate)</td><td>Email (AK); ID Document Number + ID Issuing Country (AK); Date of Birth (valid past date); Residence Country Code (FK); Client Category: Retail, Professional; Registration Channel: Web, App; Onboarding Status: Pending, Approved, Rejected</td></tr>
+    <tr><td>KYC Document</td><td>KYC Document ID</td><td>Client ID (FK); Document Type: Identity, Proof of Address, Source of Funds; Issue, Expiry, Received and Verified Dates; Verification Status: Pending, Verified, Rejected</td></tr>
+    <tr><td>Risk Assessment</td><td>Risk Assessment ID</td><td>Client ID (FK); Assessment Date; Risk Rating: Low, Medium, High; Reason</td></tr>
+    <tr><td>Trading Account</td><td>Account ID (surrogate)</td><td>Account Number (AK); Base Currency Code (FK); Opened and Closed Dates; Account Status: Open, Suspended, Closed</td></tr>
+    <tr><td>Account Holding</td><td>Client ID + Account ID (both FK)</td><td>Holder Role: Primary, Secondary; Start Date; End Date</td></tr>
+    <tr><td>Payment</td><td>Payment ID</td><td>Account ID (FK); Direction: Deposit, Withdrawal; Amount (&gt; 0); Currency Code (FK); Method: Card, Bank Transfer, E-wallet; Requested At; Status: Pending, Completed, Failed</td></tr>
+    <tr><td>Instrument</td><td>Instrument ID</td><td>ISIN (AK, shares and ETFs only); Symbol; Instrument Name; Asset Class: Share, ETF, CFD; Quote Currency Code (FK)</td></tr>
+    <tr><td>Order</td><td>Order ID</td><td>Account ID (FK); Instrument ID (FK); Placed At; Side: Buy, Sell; Order Type: Market, Limit; Quantity (&gt; 0); Limit Price (Limit orders only); Order Status: Open, Partially Filled, Filled, Cancelled, Rejected</td></tr>
+    <tr><td>Trade</td><td>Trade ID</td><td>Order ID (FK); Executed At; Quantity (&gt; 0); Price (&gt; 0)</td></tr>
+  </table></div>
+  <p>Account Holding is the only <strong>dependent entity</strong>: its primary key is made up of the keys of its two parents, so both of its relationships are identifying.</p>
+
+  <h2>4. Design decisions</h2>
+  <div class="table-scroll"><table>
+    <tr><th>#</th><th>Decision</th><th>Alternative considered</th><th>Reason</th></tr>
+    <tr><td>D1</td><td>Keep Order and Trade as separate entities.</td><td>Trade only.</td><td>An order is a request; a trade is an execution. Orders can be cancelled or rejected with no trade, or filled in several trades.</td></tr>
+    <tr><td>D2</td><td>One Payment entity with a Direction attribute.</td><td>Separate Deposit and Withdrawal entities.</td><td>Both carry the same facts (amount, currency, method, status). One entity avoids a duplicated structure.</td></tr>
+    <tr><td>D3</td><td>KYC Document as its own entity.</td><td>Document columns on Client.</td><td>A client has several documents, each with its own dates and status. Columns per document type would be a repeating group (not 1NF), and the CySEC findings concern exactly these per-document facts.</td></tr>
+    <tr><td>D4</td><td>Risk Assessment as its own entity, keeping every rating.</td><td>A single risk rating on Client.</td><td>AML oversight needs to show which rating applied when, and why it changed. Keeping history is a business requirement, so it belongs in the logical model, not only in the physical design.</td></tr>
+    <tr><td>D5</td><td>Country and Currency as governed code lists.</td><td>Free-text attributes.</td><td>Prevents “Germany”, “DE” and “Deutschland” for the same value (P1).</td></tr>
+    <tr><td>D6</td><td>Joint accounts allowed, resolved through Account Holding (role, start and end dates).</td><td>One client per account.</td><td>A business choice. A many-to-many relationship cannot be stored directly, so an associative entity records each client–account pairing and facts about the holding itself.</td></tr>
+    <tr><td>D7</td><td>A client may exist with no trading account.</td><td>Account required.</td><td>Clients register and go through KYC before an account is opened.</td></tr>
+    <tr><td>D8</td><td>Payments linked to the Trading Account.</td><td>Payments linked to the Client.</td><td>Money moves in and out of a specific account; the client is reached through Account Holding.</td></tr>
+    <tr><td>D9</td><td>Surrogate key for Client; email and ID document number as alternate keys.</td><td>Email or ID number as primary key.</td><td>Emails change, ID formats vary by country, and duplicates (P2) mean one person can appear with different emails. ISO codes are kept as keys for Country and Currency because they are stable, unique and maintained externally.</td></tr>
+    <tr><td>D10</td><td>No Instrument Name or Client Country on Trade; no stored Balance or Position.</td><td>Copies for convenience.</td><td>3NF: each fact lives once, with the entity it describes. Balance and Position can be derived from payments and trades.</td></tr>
+    <tr><td>D11</td><td>Support tickets, campaigns and market prices excluded.</td><td>Include them.</td><td>Out of scope (Part 1, section 7).</td></tr>
+  </table></div>
+
+  <h2>5. Next</h2>
+  <p>Physical model and database: the logical model implemented in SQLite (tables, data types, constraints), followed by a synthetic data set with realistic quality defects for the data quality assessment in Part 3.</p>
+
+  <div class="pager">
+    <a href="../01-case-brief/">← Part 1: Case brief</a>
+    <span>Next: Part 3, Data quality (coming soon)</span>
+  </div>
+</div></main>
+
+<footer class="site"><div class="wrap">
+  Omar Shazly · Fictional case study, synthetic data · Framework: DAMA-DMBOK2
+</div></footer>
+</body>
+</html>

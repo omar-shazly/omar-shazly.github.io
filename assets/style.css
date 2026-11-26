@@ -93,3 +93,10 @@ footer.site .wrap { padding-top: 18px; padding-bottom: 28px; }
   h1 { font-size: 26px; }
   header.site nav a { margin-left: 12px; }
 }
+
+figure { margin: 20px 0; }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 6px; }
+.rules { padding-left: 20px; }
+.rules li { margin: 4px 0; }
+code { font-size: 0.9em; background: var(--soft); padding: 1px 4px; border-radius: 3px; }
